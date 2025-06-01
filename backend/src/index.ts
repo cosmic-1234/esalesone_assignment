@@ -1,9 +1,10 @@
-// index.ts or server.ts
 
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import { sendOrderEmail } from './utils/mailer';
+import { approvedEmailTemplate, failedEmailTemplate } from './utils/templates';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -15,7 +16,7 @@ function determineStatus(cardNumber: string): 'approved' | 'declined' | 'gateway
   if (cardNumber.endsWith('1')) return 'approved';
   if (cardNumber.endsWith('2')) return 'declined';
   if (cardNumber.endsWith('3')) return 'gateway_error';
-  return 'approved'; // default fallback
+  return 'approved';
 }
 //@ts-ignore
 app.post('/checkout', async (req, res) => {
@@ -47,6 +48,16 @@ app.post('/checkout', async (req, res) => {
         },
       },
     });
+    const orderWithItems = await prisma.order.findUnique({
+        where: { orderNumber },
+        include: {
+          orderItems: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
 
     for (const item of cartItems) {
       await prisma.product.update({
@@ -56,10 +67,14 @@ app.post('/checkout', async (req, res) => {
     }
 
     if (status === 'approved') {
+        
+        await sendOrderEmail(userInfo.email, '✅ Order Confirmed', approvedEmailTemplate(orderWithItems));
       return res.status(200).json({ success: true, orderNumber });
     } else if (status === 'declined') {
+    await sendOrderEmail(userInfo.email, '❌ Transaction Declined', failedEmailTemplate(orderNumber, 'Transaction Declined by Bank'));
       return res.status(400).json({ success: false, error: '❌ Transaction Declined by Bank', orderNumber });
     } else if (status === 'gateway_error') {
+        await sendOrderEmail(userInfo.email, '⚠️ Payment Gateway Error', failedEmailTemplate(orderNumber, 'Payment Gateway Error'));
       return res.status(502).json({ success: false, error: '⚠️ Payment Gateway Error', orderNumber });
     }
 

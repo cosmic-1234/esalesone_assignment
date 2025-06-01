@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-
+import * as dotenv from 'dotenv'
+dotenv.config()
 export default function ThankYouPage() {
   const { orderNumber } = useParams();
   const [orderData, setOrderData] = useState<any>(null);
@@ -15,7 +16,7 @@ export default function ThankYouPage() {
 
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`http://localhost:3001/order/${orderNumber}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API}/order/${orderNumber}`);
         setOrderData(res.data);
       } catch (err: any) {
         setError('⚠️ Order not found or failed to load.');

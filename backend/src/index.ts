@@ -3,7 +3,8 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { sendOrderEmail } from './utils/mailer';
+// import { sendOrderEmail } from './utils/mailer'; used for mailtrap
+import { sendOrderConfirmationEmail } from './utils/sendgrid';
 import { approvedEmailTemplate, failedEmailTemplate } from './utils/templates';
 
 const app = express();
@@ -68,13 +69,13 @@ app.post('/checkout', async (req, res) => {
 
     if (status === 'approved') {
         
-        await sendOrderEmail(userInfo.email, '✅ Order Confirmed', approvedEmailTemplate(orderWithItems));
+        await sendOrderConfirmationEmail(userInfo.email, '✅ Order Confirmed', approvedEmailTemplate(orderWithItems));
       return res.status(200).json({ success: true, orderNumber });
     } else if (status === 'declined') {
-    await sendOrderEmail(userInfo.email, '❌ Transaction Declined', failedEmailTemplate(orderNumber, 'Transaction Declined by Bank'));
+    await sendOrderConfirmationEmail(userInfo.email, '❌ Transaction Declined', failedEmailTemplate(orderNumber, 'Transaction Declined by Bank'));
       return res.status(400).json({ success: false, error: '❌ Transaction Declined by Bank', orderNumber });
     } else if (status === 'gateway_error') {
-        await sendOrderEmail(userInfo.email, '⚠️ Payment Gateway Error', failedEmailTemplate(orderNumber, 'Payment Gateway Error'));
+        await sendOrderConfirmationEmail(userInfo.email, '⚠️ Payment Gateway Error', failedEmailTemplate(orderNumber, 'Payment Gateway Error'));
       return res.status(502).json({ success: false, error: '⚠️ Payment Gateway Error', orderNumber });
     }
 

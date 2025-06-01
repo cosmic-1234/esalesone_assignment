@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { useCart } from '../cart-context';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
-
+  const router = useRouter();
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -89,6 +90,7 @@ export default function CheckoutPage() {
       if (ok) {
         setSuccess(`✅ Payment Approved! Order #${orderNumber}`);
         clearCart();
+  router.push(`/thank-you/${orderNumber}`);
       } else {
         setError('❌ Transaction failed. Please try again.');
       }

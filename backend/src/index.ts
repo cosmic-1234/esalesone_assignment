@@ -70,5 +70,28 @@ app.post('/checkout', async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
+//@ts-ignore
+app.get('/order/:orderNumber', async (req, res) => {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { orderNumber: req.params.orderNumber },
+        include: {
+          orderItems: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+  
+      if (!order) return res.status(404).json({ error: 'Order not found' });
+  
+      res.json(order);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch order' });
+    }
+  });
+  
 
 app.listen(3001, () => console.log('✅ Backend running on http://localhost:3001'));

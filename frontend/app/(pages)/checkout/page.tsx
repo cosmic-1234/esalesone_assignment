@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useCart } from '../cart-context';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
@@ -65,7 +67,8 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3001/checkout', {
+      console.log(process.env.NEXT_PUBLIC_API)
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API}/checkout`, {
         userInfo: {
           fullName: form.fullName,
           email: form.email,

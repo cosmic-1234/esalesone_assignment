@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useCart } from '../cart-context';
+import { useCart } from './(pages)/cart-context';
 
 interface Product {
   id: number;
@@ -57,10 +57,6 @@ export default function LandingPage() {
     });
     alert(`${product.title} added to cart!`);
   };
-
-  // Prevent buttons overlapping: Cart button bottom-right, Checkout button bottom-left
-  // Make CartPopup's button bottom-right and LandingPage Checkout button bottom-left
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-pink-50 px-6 py-16 relative">
       <h1 className="max-w-4xl mx-auto text-center text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600 drop-shadow-lg select-none mb-20">
@@ -180,8 +176,6 @@ export default function LandingPage() {
           </article>
         ))}
       </div>
-
-      {/* Checkout button fixed bottom left */}
       <div className="fixed bottom-6 left-6 z-50">
         <button
           onClick={() => (window.location.href = '/checkout')}

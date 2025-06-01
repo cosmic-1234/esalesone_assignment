@@ -1,0 +1,16 @@
+# docker/Dockerfile.frontend
+
+FROM node:18-bullseye
+
+WORKDIR /app
+
+# Copy the frontend code into /app
+COPY frontend/ /app/
+
+RUN npm install
+
+#RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
